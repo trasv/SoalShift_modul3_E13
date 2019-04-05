@@ -51,7 +51,7 @@ void* awal(void *arg)
                 {
                         printf("Fitur Iraj Ayo Tidur disabled 10s\n\n");
                 }
-                else if(statusiss==1)
+                else if(statusaws==1)
                 {
                         iss-=20;
                         flagiss+=1;
