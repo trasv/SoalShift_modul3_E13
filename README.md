@@ -262,6 +262,138 @@ Jawab :
    
 Kami menggunakan 7 thread dimana 2 thread untuk memasukkan 10 proses ke file, 2 thread untuk menzip masing masing file, 1 proses untuk menunggu, dan 2 thread terakhir untuk mengunzip masing masing zip tadi. terdapat banyak flag yang digunakan untuk tanda agar masing masing thread berjalan bersama-sama/bergantian tergantung soal misalnya 2 thread untuk memasukkan file berjalan bersama lalu flag berganti lalu 2 thread untuk zip berjalan, dan seterusnya.
 
+```
+#include<stdio.h>
+#include<string.h>
+#include<pthread.h>
+#include<stdlib.h>
+#include<unistd.h>
+
+pthread_t tid1, tid2, tid3, tid4, tid5, tid6, tid7, tid8;
+int status_ketxt1 = 0;
+int status_ketxt2 = 0;
+int status2 = 0;
+int statusprint = 0;
+int statusprint1 = 0;
+int statusprint2 = 0;
+
+
+void* ketxt1(void *arg)
+{
+    system("ps -aux | tail -n10 > /home/trasv/Documents/FolderProses1/SimpanProses1.txt");
+    status_ketxt1 = 1;
+
+}
+
+void* ketxt2(void *arg)
+{
+    system("ps -aux | tail -n10 > /home/trasv/Documents/FolderProses2/SimpanProses2.txt");
+    status_ketxt2 = 1;
+
+}
+
+
+void* ngezip1(void *arg)
+{
+    while(status_ketxt1 != 1)
+    {
+
+    }
+
+    system("zip -m -j /home/trasv/Documents/FolderProses1/KompresProses1.zip /home/trasv/Documents/FolderProses1/SimpanProses1.txt");
+
+    statusprint1 = 1;
+}
+
+void* ngezip2(void *arg)
+{
+    while(status_ketxt2 != 1)
+    {
+
+    }
+
+    system("zip -m -j /home/trasv/Documents/FolderProses2/KompresProses2.zip /home/trasv/Documents/FolderProses2/SimpanProses2.txt");
+
+    statusprint2 = 1;
+}
+
+void* nunggu(void *arg)
+{
+    //printf("tes\n");
+    while(statusprint1 != 1 && statusprint2 != 1)
+    {
+
+    }
+
+    //printf("test\n");
+
+    statusprint = 1;
+
+}
+
+void* ngeprint(void *arg)
+{
+    while(statusprint != 1)
+    {
+
+    }
+
+    printf("Menunggu 15 detik untuk mengekstrak kembali\n");
+    sleep(15);
+    status2 = 1;
+
+}
+
+void* ngeunzip1(void *arg)
+{
+    while(status2 != 1)
+    {
+
+    }
+
+    system("unzip /home/trasv/Documents/FolderProses1/KompresProses1.zip");
+    system("mv /home/trasv/Timo/Sisop/3/SimpanProses1.txt /home/trasv/Documents/FolderProses1/");
+}
+
+void* ngeunzip2(void *arg)
+{
+    while(status2 != 1)
+    {
+
+    }
+
+    system("unzip /home/trasv/Documents/FolderProses2/KompresProses2.zip");
+    system("mv /home/trasv/Timo/Sisop/3/SimpanProses2.txt /home/trasv/Documents/FolderProses2/");
+
+}
+
+int main(void)
+{
+
+    pthread_create(&(tid1), NULL, ketxt1, NULL);
+    pthread_create(&(tid2), NULL, ketxt2, NULL);
+    pthread_create(&(tid3), NULL, ngezip1, NULL);
+    pthread_create(&(tid4), NULL, ngezip2, NULL);
+    pthread_create(&(tid5), NULL, nunggu, NULL);
+    pthread_create(&(tid6), NULL, ngeprint, NULL);
+    pthread_create(&(tid7), NULL, ngeunzip1, NULL);
+    pthread_create(&(tid8), NULL, ngeunzip2, NULL);
+
+
+    pthread_join(tid1, NULL);
+    pthread_join(tid2, NULL);
+    pthread_join(tid3, NULL);
+    pthread_join(tid4, NULL);
+    pthread_join(tid5, NULL);
+    pthread_join(tid6, NULL);
+    pthread_join(tid7, NULL);
+    pthread_join(tid8, NULL);
+
+
+    return 0;
+}
+```
+
 
 5.	Angga, adik Jiwang akan berulang tahun yang ke sembilan pada tanggal 6 April besok. Karena lupa menabung, Jiwang tidak mempunyai uang sepeserpun untuk membelikan Angga kado. Kamu sebagai sahabat Jiwang ingin membantu Jiwang membahagiakan adiknya sehingga kamu menawarkan bantuan membuatkan permainan komputer sederhana menggunakan program C. Jiwang sangat menyukai idemu tersebut. Berikut permainan yang Jiwang minta. 
 
@@ -370,3 +502,444 @@ G.	Pastikan terminal hanya mendisplay status detik ini sesuai scene terkait (hin
    karena disuruh untuk auto detect input keyboard tanpa enter, dan karena getch tidak bisa digunakan di c linux, maka kami menggunakan template dari getch itu sendiri dari internet
    di program game terdapat 10 thread dimana ada yang untuk menu awal, ada yang untuk mengeprint menu di state sekarang, untuk mendecrement variabel tertentu, dan terakhir untuk mengakhiri program
    di program penjual hanya ada 3 thread dimana ada thread untuk menu toko, untuk mengeprint menu tiap detik dan terakhir untuk mengakhiri program.
+
+Program Game
+
+```
+#include<stdio.h>
+#include<string.h>
+#include<pthread.h>
+#include<stdlib.h>
+#include<unistd.h>
+#include<signal.h>
+#include<sys/shm.h>
+#include<sys/ipc.h>
+#include<termios.h>
+
+pthread_t tid1, tid2, tid3, tid4, tid5, tid6, tid7, tid8, tid9, tid10;
+int status;
+
+int *value;
+char nama[100];
+int health = 300;
+int hunger = 200;
+int hygiene = 100;
+int food = 0;
+int foodstock = 0;
+int bathcd = 0;
+int bathcooldown = 0;
+int enemyhealth = 100;
+int state = 0;
+int kalah=0;
+int keluar=0;
+
+int getch()
+{
+    struct termios oldattr, newattr;
+    int ch;
+    tcgetattr( STDIN_FILENO, &oldattr );
+    newattr = oldattr;
+    newattr.c_lflag &= ~( ICANON | ECHO );
+    tcsetattr( STDIN_FILENO, TCSANOW, &newattr );
+    ch = getchar();
+    tcsetattr( STDIN_FILENO, TCSANOW, &oldattr );
+    return ch;
+}
+
+void* mulai(void *arg)
+{
+    printf("Masukkan Nama monster yang diinginkan : ");
+    scanf("%s",nama);
+    //while(1)
+    //    {
+		while(1)
+                {
+			//standby
+			state = 1; //decrement standby mode
+			status = 1; //ngeprint
+                	char action;
+
+                        //scanf("%d",&action);
+			action=getch();
+                        if(action=='1')
+                        {
+				food--;
+				hunger+=15;
+                        }
+   			else if(action=='2' && bathcooldown==0)
+                        {
+				hygiene+=30;
+				bathcooldown=1;
+                        }
+                        else if(action=='3')
+                        {
+				//battle mode
+				enemyhealth = 100;
+				while(1)
+                        	{
+                         		char action;
+					state = 0;
+					status = 2;
+                                	//scanf("%d",&action);
+					action=getch();
+
+                                	if(action=='1')
+                                	{
+                                        	health-=20;
+                                        	enemyhealth-=20;
+                                	}
+                                	else if(action=='2')
+                                	{
+                                        	break;
+                                	}
+                                	if(enemyhealth<=0)
+                                	{
+                                        	printf("NPC Telah Kalah\n");
+                                        	break;
+                                	}
+                        	}
+                        }
+                        else if(action=='4')
+                        {
+				//shop mode
+				key_t key = 6969;
+				int shmid = shmget(key, sizeof(int), IPC_CREAT | 0666);
+				value = shmat(shmid, NULL, 0);
+				//foodstock=*value;
+
+				while(1)
+                        	{
+					//foodstock=value;
+					status = 3;
+					state=0;
+                                	char action;
+                                	//scanf("%d",&action);
+					action=getch();
+
+                                	if(action=='1')
+                                	{
+                                        	if((*value)<=0)
+						{
+							printf("Stok toko habis\n");
+						}
+						else
+						{
+							food++;
+                                                	(*value)--;
+						}
+                                	}
+                                	else if(action=='2')
+                                	{
+                                	        break;
+                                	}
+                                	system("clear");
+                        	}
+				shmdt(value);
+				shmctl(shmid, IPC_RMID, NULL);
+
+                        }
+                        else if(action=='5')
+                        {
+				keluar=1;
+                                break;
+                        }
+                        //system("clear");
+                }
+	//}
+        //system("clear");
+
+    return NULL;
+}
+
+void* hungerstatus(void *arg)
+{
+    while(1)
+    {
+	if(state==1)
+	{
+		sleep(10);
+		if(state==1)
+		{
+			hunger-=5;
+		}
+	}
+    }
+}
+
+void* hygienestatus(void *arg)
+{
+    while(1)
+    {
+        if(state==1)
+        {
+                sleep(30);
+		if(state==1)
+		{
+                	hygiene-=10;
+		}
+        }
+    }
+}
+
+void* healthstatus(void *arg)
+{
+    while(1)
+    {
+        if(state==1)
+        {
+                sleep(10);
+		if(state==1)
+		{
+			health+=5;
+		}
+        }
+    }
+}
+
+void* th_bathcooldown(void *arg)
+{
+    while(1)
+    {
+        if(bathcooldown==1)
+        {
+		bathcd=20;
+                sleep(20);
+                bathcooldown=0;
+		bathcd=1;
+        }
+    }
+}
+
+void* hitung_bathcooldown(void *arg)
+{
+    while(1)
+    {
+        while(bathcooldown==1)
+        {
+                sleep(1);
+                bathcd--;
+        }
+    }
+}
+
+void* print_standby(void *arg)
+{
+    while(1)
+    {
+	if(status==1)
+	{
+		printf("Standby Mode\n");
+		printf("Nama : %s\n",nama);
+        	printf("Health : %d\n",health);
+        	printf("Hunger : %d\n",hunger);
+        	printf("Hygiene : %d\n",hygiene);
+        	printf("Food left : %d\n",food);
+        	printf("Bath will be ready in %ds\n",bathcd);
+        	printf("Choices\n");
+        	printf("1. Eat\n2. Bath\n3. Battle\n4. Shop\n5. Exit\n");
+		sleep(1);
+		system("clear");
+    	}
+    }
+}
+
+void* print_battle(void *arg)
+{
+    while(1)
+    {
+        if(status==2)
+        {
+                printf("Battle Mode\n");
+		printf("Nama : %s\n",nama);
+                printf("Monster's Health : %d\n",health);
+                printf("Enemy's Health : %d\n",enemyhealth);
+                printf("Choices\n");
+                printf("1. Attack\n2. Run\n");
+                sleep(1);
+                system("clear");
+        }
+    }
+}
+
+void* print_shop(void *arg)
+{
+    while(1)
+    {
+        if(status==3)
+        {
+		printf("Shop Mode\n");
+		printf("Nama : %s\n",nama);
+                printf("Shop food stock : %d\n",*value);
+                printf("Your food stock : %d\n",food);
+                printf("Choices\n");
+                printf("1. Buy\n2. Back\n");
+                sleep(1);
+                system("clear");
+        }
+    }
+}
+
+void* selesai(void *arg)
+{
+    while(1)
+    {
+	if(hunger<=0 || hygiene<=0 || keluar==1)
+	{
+		break;
+	}
+    }
+
+    if(keluar==1)
+    {
+	printf("Anda Telah Keluar dari permainan\n");
+    }
+    else
+    {
+	printf("Monster Anda Kalah\n");
+    }
+    pthread_kill(tid1, SIGKILL);
+    pthread_kill(tid2, SIGKILL);
+    pthread_kill(tid3, SIGKILL);
+    pthread_kill(tid4, SIGKILL);
+    pthread_kill(tid5, SIGKILL);
+    pthread_kill(tid6, SIGKILL);
+    pthread_kill(tid7, SIGKILL);
+    pthread_kill(tid8, SIGKILL);
+    pthread_kill(tid9, SIGKILL);
+
+}
+
+int main()
+{
+
+    pthread_create(&(tid1), NULL, mulai, NULL);
+    pthread_create(&(tid2), NULL, hungerstatus, NULL);
+    pthread_create(&(tid3), NULL, hygienestatus, NULL);
+    pthread_create(&(tid4), NULL, healthstatus, NULL);
+    pthread_create(&(tid5), NULL, th_bathcooldown, NULL);
+    pthread_create(&(tid6), NULL, hitung_bathcooldown, NULL);
+    pthread_create(&(tid7), NULL, print_standby, NULL);
+    pthread_create(&(tid8), NULL, print_battle, NULL);
+    pthread_create(&(tid9), NULL, print_shop, NULL);
+    pthread_create(&(tid10), NULL, selesai, NULL);
+
+    pthread_join(tid1, NULL);
+    pthread_join(tid2, NULL);
+    pthread_join(tid3, NULL);
+    pthread_join(tid4, NULL);
+    pthread_join(tid5, NULL);
+    pthread_join(tid6, NULL);
+    pthread_join(tid7, NULL);
+    pthread_join(tid8, NULL);
+    pthread_join(tid9, NULL);
+    pthread_join(tid10, NULL);
+
+    return 0;
+}
+```
+
+Program shop
+
+```
+#include<stdio.h>
+#include<string.h>
+#include<pthread.h>
+#include<stdlib.h>
+#include<unistd.h>
+#include<sys/ipc.h>
+#include<sys/shm.h>
+#include<signal.h>
+#include<termios.h>
+
+pthread_t tid1, tid2, tid3;
+int status;
+
+int *value;
+int foodstock;
+int keluar=0;
+
+int getch()
+{
+    struct termios oldattr, newattr;
+    int ch;
+    tcgetattr( STDIN_FILENO, &oldattr );
+    newattr = oldattr;
+    newattr.c_lflag &= ~( ICANON | ECHO );
+    tcsetattr( STDIN_FILENO, TCSANOW, &newattr );
+    ch = getchar();
+    tcsetattr( STDIN_FILENO, TCSANOW, &oldattr );
+    return ch;
+}
+
+void* shop(void *arg)
+{
+    status = 1;
+    key_t key = 6969;
+    int shmid = shmget(key, sizeof(int), IPC_CREAT | 0666);
+    value = shmat(shmid, NULL, 0);
+    //foodstock=*value;
+
+    while(1)
+    {
+	char action;
+	//scanf("%d",&action);
+	action=getch();
+
+	if(action=='1')
+	{
+		(*value)++;
+	}
+	else if(action=='2')
+	{
+		keluar=1;
+		break;
+	}
+    }
+    shmdt(value);
+    shmctl(shmid, IPC_RMID, NULL);
+}
+
+void* print_shop(void *arg)
+{
+    while(1)
+    {
+	if(status==1)
+	{
+		printf("Shop\n");
+        	printf("Food stock : %d\n",*value);
+        	printf("Choices\n");
+        	printf("1. Restock\n2. Exit\n");
+        	sleep(1);
+        	system("clear");
+	}
+    }
+}
+
+void* selesai(void *arg)
+{
+    while(1)
+    {
+        if(keluar==1)
+        {
+		printf("Anda Telah Keluar dari shop\n");
+		break;
+        }
+    }
+    pthread_kill(tid1, SIGKILL);
+    pthread_kill(tid2, SIGKILL);
+    pthread_kill(tid3, SIGKILL);
+}
+int main(void)
+{
+
+    pthread_create(&(tid1), NULL, shop, NULL);
+    pthread_create(&(tid2), NULL, print_shop, NULL);
+    pthread_create(&(tid3), NULL, selesai, NULL);
+
+    pthread_join(tid1, NULL);
+    pthread_join(tid2, NULL);
+    pthread_join(tid3, NULL);
+
+    return 0;
+}
+```
