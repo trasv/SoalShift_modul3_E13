@@ -57,6 +57,6 @@ Dengan Syarat :
 
    ➔	Boleh menggunakan system
 
-   Jawab :
+Jawab :
    
-   Kami menggunakan 7 thread dimana 2 thread untuk memasukkan 10 proses ke file, 2 thread untuk menzip masing masing file, 1 proses untuk menunggu, dan 2 thread terakhir untuk mengunzip masing masing zip tadi. terdapat banyak flag yang digunakan untuk tanda agar masing masing thread berjalan bersama-sama/bergantian tergantung soal misalnya 2 thread untuk memasukkan file berjalan bersama lalu flag berganti lalu 2 thread untuk zip berjalan, dan seterusnya.
+Kami menggunakan 7 thread dimana 2 thread untuk memasukkan 10 proses ke file, 2 thread untuk menzip masing masing file, 1 proses untuk menunggu, dan 2 thread terakhir untuk mengunzip masing masing zip tadi. terdapat banyak flag yang digunakan untuk tanda agar masing masing thread berjalan bersama-sama/bergantian tergantung soal misalnya 2 thread untuk memasukkan file berjalan bersama lalu flag berganti lalu 2 thread untuk zip berjalan, dan seterusnya.
