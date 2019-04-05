@@ -55,8 +55,15 @@ void* mulai(void *arg)
 			action=getch();
                         if(action=='1')
                         {
-				food--;
-				hunger+=15;
+				if(hunger>=200)
+				{
+					printf("Sudah kenyang!\n");
+				}
+				else
+				{
+                                	food--;
+                                	hunger+=15;
+				}
                         }
    			else if(action=='2' && bathcooldown==0)
                         {
