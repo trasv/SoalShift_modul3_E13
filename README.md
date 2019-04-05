@@ -161,3 +161,11 @@ Choices
 2.	Exit
 
 G.	Pastikan terminal hanya mendisplay status detik ini sesuai scene terkait (hint: menggunakan system(“clear”))
+
+
+   Jawab :
+   
+   Terdapat 2 program dimana satunya adalah gamenya dan satunya adalah program penjual
+   karena disuruh untuk auto detect input keyboard tanpa enter, dan karena getch tidak bisa digunakan di c linux, maka kami menggunakan template dari getch itu sendiri dari internet
+   di program game terdapat 10 thread dimana ada yang untuk menu awal, ada yang untuk mengeprint menu di state sekarang, untuk mendecrement variabel tertentu, dan terakhir untuk mengakhiri program
+   di program penjual hanya ada 3 thread dimana ada thread untuk menu toko, untuk mengeprint menu tiap detik dan terakhir untuk mengakhiri program.
