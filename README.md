@@ -1,6 +1,152 @@
 # SoalShift_modul3_E13
 Jawaban Soal Praktikum Modul 3 Sisop
 
+1. Buatlah program C yang bisa menghitung faktorial secara parallel lalu menampilkan hasilnya secara berurutan
+Contoh:
+
+   ./faktorial 5 3 4
+   
+   3! = 6
+   
+   4! = 24
+   
+   5! = 120
+   
+   Jawab:
+   ```
+   #include <stdio.h>
+   #include <string.h>
+   #include <pthread.h>
+   #include <stdlib.h>
+   #include <unistd.h>
+   #include <sys/types.h>
+   #include <sys/wait.h>
+
+   pthread_t tid[100];
+
+   void insertionSort(int a[], int n){
+   	int key, i;
+	for(int j=2; j<n; j++){
+		key = a[j];
+		i = j-1;
+		while(i>0 && a[i] > key){
+			a[i+1] = a[i];
+			i--;
+		}
+       a[i+1] = key;
+	}
+   }
+
+   void *factorial(void *ptr){
+   	int n = *((int*) ptr);
+	int temp = n;
+	unsigned long long hasil = 1;
+	if(n == 0 || n == 1){
+		hasil = 1;
+	} else{
+		for(n; n >=1; n--){
+			hasil *= n;
+		}
+	}
+	printf("%d! = %llu\n", temp, hasil);
+   }
+
+   int main(int argc, const char * argv[]){
+	int a[argc], err;
+	for(int j=1; j<argc; j++){
+		a[j] = atoi(argv[j]);
+	}
+	insertionSort(a, argc);
+
+	for(int i=1; i<argc; i++){
+		err = pthread_create(&(tid[i]), NULL, factorial, &a[i]);
+		if(err!=0) {
+			printf("\n can't create thread : [%s]",strerror(err));
+		}
+		pthread_join(tid[i], NULL);
+	}
+   	return 0;
+   }
+   ```
+   #### Pengambilan angka
+   Karena angka yang akan dihitung diambil dari parameter linux bash saat menjalankan program, maka untuk mendapatkannya didalam `int main()` dimasukkan `int argc, const char * argv[]`, dimana akan secara otomatis akan menghitung jumlah parameter dan menyimpannya ke dalam array. Data `argc` ini dapat digunakan untuk mengetahui jumlah elemen array yang berikutnya disalin ke array int agar bisa dilakukan penghitungan dengan fungsi `atoi` ke masing-masing elemen, sebagai berikut.
+   ```
+   int main(int argc, const char * argv[]){
+	int a[argc], err;
+	for(int j=1; j<argc; j++){
+		a[j] = atoi(argv[j]);
+	}
+	return 0;
+   }
+   ```
+   #### Pengurutan angka
+   Karena hasil output adalah berupa hasil faktorial dari setiap angka parameter, maka harus dilakukan pengurutan angka pada array tersebut. Di sini digunakan algoritma Insertion Sort untuk mengurutkannya. Seperti dalam fungsi berikut.
+   ```
+   void insertionSort(int a[], int n){
+   	int key, i;
+	for(int j=2; j<n; j++){
+		key = a[j];
+		i = j-1;
+		while(i>0 && a[i] > key){
+			a[i+1] = a[i];
+			i--;
+		}
+        a[i+1] = key;
+	}
+   }
+   ```
+   #### Penghitungan faktorial
+   Setelah diurutkan dengan insertion sort, berikutnya langsung dihitung hasil faktorial. Karena hasil untuk setiap angka dihitung secara paralel, dibuat thread sebanyak `argc-1` (banyak parameter) untuk menghitungnya. Di sini digunakan perulangan untuk masing-masing iterasi membuat thread yang dijalankan untuk fungsi faktorial, dengan parameter utut dari array ke 1 sampai argc-1. Seperti berikut.
+   ```
+   for(int i=1; i<argc; i++){
+	err = pthread_create(&(tid[i]), NULL, factorial, &a[i]);
+	if(err!=0) {
+		printf("\n can't create thread : [%s]",strerror(err));
+	}
+	pthread_join(tid[i], NULL);
+   }
+   ```
+   dan fungsi faktorial sebagai berikut.
+   ```
+   void *factorial(void *ptr){
+   	int n = *((int*) ptr);
+	int temp = n;
+	unsigned long long hasil = 1;
+	if(n == 0 || n == 1){
+		hasil = 1;
+	} else{
+		for(n; n >=1; n--){
+			hasil *= n;
+		}
+	}
+	printf("%d! = %llu\n", temp, hasil);
+   }
+   ```
+   Fungsi faktorial tersebut hanya dijalankan dengan perulangan dengan angka tersebut dikurang satu selama angka tersebut > 0. Hasilnya akan seperti berikut.
+
+2. Pada suatu hari ada orang yang ingin berjualan 1 jenis barang secara private, dia memintamu membuat program C dengan spesifikasi sebagai berikut:
+
+   a. Terdapat 2 server: server penjual dan server pembeli
+   
+   b. 1 server hanya bisa terkoneksi dengan 1 client
+   
+   c. Server penjual dan server pembeli memiliki stok barang yang selalu sama
+   
+   d. Client yang terkoneksi ke server penjual hanya bisa menambah stok
+      - Cara menambah stok: client yang terkoneksi ke server penjual mengirim string “tambah” ke server lalu stok bertambah 1
+      
+   e. Client yang terkoneksi ke server pembeli hanya bisa mengurangi stok
+      - Cara mengurangi stok: client yang terkoneksi ke server pembeli mengirim string “beli” ke server lalu stok berkurang 1
+      
+   f. Server pembeli akan mengirimkan info ke client yang terhubung dengannya apakah transaksi berhasil atau tidak berdasarkan ketersediaan stok
+      - Jika stok habis maka client yang terkoneksi ke server pembeli akan mencetak “transaksi gagal”
+      - Jika stok masih ada maka client yang terkoneksi ke server pembeli akan mencetak “transaksi berhasil”
+      
+   g. Server penjual akan mencetak stok saat ini setiap 5 detik sekali
+   
+   h. Menggunakan thread, socket, shared memory
+
+
 3. Agmal dan Iraj merupakan 2 sahabat yang sedang kuliah dan hidup satu kostan, sayangnya mereka mempunyai gaya hidup yang berkebalikan, dimana Iraj merupakan laki-laki yang sangat sehat,rajin berolahraga dan bangun tidak pernah kesiangan sedangkan Agmal hampir menghabiskan setengah umur hidupnya hanya untuk tidur dan ‘ngoding’. Dikarenakan mereka sahabat yang baik, Agmal dan iraj sama-sama ingin membuat satu sama lain mengikuti gaya hidup mereka dengan cara membuat Iraj sering tidur seperti Agmal, atau membuat Agmal selalu bangun pagi seperti Iraj. Buatlah suatu program C untuk menggambarkan kehidupan mereka dengan spesifikasi sebagai berikut:
 
    a.	Terdapat 2 karakter Agmal dan Iraj
