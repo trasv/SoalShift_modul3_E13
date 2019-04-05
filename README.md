@@ -145,7 +145,99 @@ Contoh:
    g. Server penjual akan mencetak stok saat ini setiap 5 detik sekali
    
    h. Menggunakan thread, socket, shared memory
+   
+   Jawab:
+   
+   Akan ada empat file: 
+   
+   [soal2clientbeli.c](Soal2/soal2clientbeli.c)
+   
+   [soal2clientjual.c](Soal2/soal2clientjual.c)
+   
+   [soal2serverbeli.c](Soal2/soal2serverbeli.c)
+   
+   [soal2serverjual.c](Soal2/soal2serverjual.c)
+   
+   #### Pembuatan server dan client
+   Untuk server dibuat dengan menggunakan syntax pembuatan socket pada server. Bedanya, pada kedua server di dalam `while(True)` akan digunakan shared memory agar dari kedua server nilai stok dapat terhubung. Bedanya dalam while tersebut, terdapat perbedaan pengecekan input dari client.
+   
+   Shared Memory
+   ```
+   key_t key = 1234;
+   int *stok;
 
+   int shmid = shmget(key, sizeof(int), IPC_CREAT | 0666);
+   stok = shmat(shmid, NULL, 0);
+   
+   shmdt(stok);
+   shmctl(shmid, IPC_RMID, NULL);
+   ```
+   
+   Dimana jika client menginput beli pada server beli dan stok = 0, maka akan muncul tulisan transaksi gagal dari server beli ke client beli dan pengurangan tidak dilakukan, sebaliknya jika stok > 0 maka muncul tulisan transaksi berhasil.
+   
+   soal2serverbeli.c
+   ```
+   while(1){		
+	valread = read(new_socket, buffer, 20);
+	if(!valread)
+		break;
+	printf("%s\n",buffer );
+	if(strcmp(buffer, "beli") == 0){
+		if(*stok == 0){
+			send(new_socket, gagal, strlen(gagal) , 0 );
+		}
+		else {
+			(*stok) = (*stok)-1;
+			send(new_socket, berhasil, strlen(berhasil) , 0 );
+		}	
+	}
+   }
+   ```
+   soal2clientbeli.c
+   ```
+   while(1){
+	char buffer[20] = {0};
+	scanf("%s", buffer);
+	send(sock, buffer, strlen(buffer), 0);
+	printf("%s message sent\n", buffer);
+	valread = read(sock, buffer, 20);
+	printf("%s\n", buffer);
+   }
+   ```
+   Di server jual, akan menampilkan sisa stok setiap 5 detik. Di situ digunakan thread karena diperlukan fungsi `sleep()`, jika sleep digunakan di program utama, maka selama waktu sleep, server tidak bisa menjalankan apapun termasuk menerima input dari client. Maka dibuat thread agar fungsi tersebut dijalankan secara terpisah. Dan jika client mengirim kata 'tambah' maka stok ditambah satu. Di sini juga digunakan shared memory agar terhubung dengan server beli.
+   
+   Sedangkan dalam client jual, tidak perlu menerima (read) dari server. Hanya mengirim ke server dengan `send()`. Seperti berikut.
+   
+   soal2serverjual.c
+   ```
+   while(1){
+	memset(buffer, '\0', sizeof(buffer));
+	valread = read(new_socket, buffer, 20);
+	if(!valread)
+		break;
+	printf("%s\n",buffer );
+	if(strcmp(buffer, "tambah") == 0){
+		(*stok) = (*stok) + 1;
+	}
+   }
+   ```
+   Diperlukan `memset` karena read hanya akan mengganti buffer sesuai karakter yang diperlukan tanpa menghapus buffer tersebut, sehingga jika buffer diganti kata dari panjang ke lebih pendek, sisa huruf di kata yang lebih panjang akan tersisa. Sementara fungsi untuk print sebagai berikut.
+   ```
+   void *print(void *ptr){
+	while(1){
+		printf("Stok sekarang: %d\n", *((int*) ptr));
+		sleep(5);
+	}
+   }
+   ```
+   dan dibuat thread sebagai berikut.
+   ```
+   err = pthread_create(&(tid[1]), NULL, print, stok);
+	if(err!=0) {
+		printf("\n can't create thread : [%s]", strerror(err));
+   }
+   ```
+   Sehingga akan tercipta 4 file, dan masing-masing file tidak berjalan secara berkaitan, tetapi karena ada shared memory, maka kedua server seolah berkomunikasi.
 
 3. Agmal dan Iraj merupakan 2 sahabat yang sedang kuliah dan hidup satu kostan, sayangnya mereka mempunyai gaya hidup yang berkebalikan, dimana Iraj merupakan laki-laki yang sangat sehat,rajin berolahraga dan bangun tidak pernah kesiangan sedangkan Agmal hampir menghabiskan setengah umur hidupnya hanya untuk tidur dan ‘ngoding’. Dikarenakan mereka sahabat yang baik, Agmal dan iraj sama-sama ingin membuat satu sama lain mengikuti gaya hidup mereka dengan cara membuat Iraj sering tidur seperti Agmal, atau membuat Agmal selalu bangun pagi seperti Iraj. Buatlah suatu program C untuk menggambarkan kehidupan mereka dengan spesifikasi sebagai berikut:
 
