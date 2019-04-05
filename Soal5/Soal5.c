@@ -110,8 +110,15 @@ void* mulai(void *arg)
 
                                 	if(action=='1')
                                 	{
-                                        	food++;
-                                        	(*value)--;
+                                        	if((*value)<=0)
+						{
+							printf("Stok toko habis\n");
+						}
+						else
+						{
+							food++;
+                                                	(*value)--;
+						}
                                 	}
                                 	else if(action=='2')
                                 	{
