@@ -159,9 +159,20 @@ Contoh:
    
    [soal2serverjual.c](Soal2/soal2serverjual.c)
    
-   #### Socket programming
+   #### Socket programming server
    Dalam membuat socket programming, terdapat beberapa syarat dalam pembuatan dengan metode client-server. Dimana server harus berperan sebagai listener yang menunggu inisialisasi komunikasi dari client yang berperan sebagai inisialitator komunikasi. Oleh karena itu terdapat perbedaan langkah pembuatan server dan client sebagaimana dijelaskan di gambar berikut.
    
+   ![soal2.png](Soal2/soal2.png)
+   
+   Sebagaimana dalam gambar serever pertama akan membuat socket (program yang berjalan dalam sebuah port) dengan fungsi `socket()` dan disimpan hasilnya ke dalam variabel integer sebagai descriptor/penunjuk ke socket yang baru dibuat. Lalu, berikutnya dipanggil fungsi `setsockopt()` sebagai konfigurasi socket khususnya pada address dan port, untuk penggunaan berulang.
+   
+   Setelah itu, socket akan dipasang (diterapkan) pada alamat dan port di komputer yang sudah disiapkan dengan menggunakan fungsi `bind()`. Di sini kita memasang socket tersebut ke komputer sendiri, sehingga digunakam localhost(`127.0.0.1`) sebagai IP. Setelah socket dipasang, maka socket siap melakukan listen dengan fungsi `listen()`. Di fase ini, server akan diam (pasif) menunggu ada client yang terhubung dengannya.
+   
+   Berikutnya ada fungsi `accept()` yang disimpan dalam variabel integer. Variabel ini digunakan sebagai descriptor untuk pesan yang dikirim client. Dan berikutnya, kita bisa menjalankan fungsi-fungsi di socket server sesuai kebutuhan.
+   
+   #### Socket programming client
+   
+   Dalam pembuatan client, proses yang dilakukan tidak sebanyak server karena client tidak perlu melakukan bind pada IP dan port tertentu dan tidak perlu melakukan listen. Setelah pembuatan socket dengan fungsi `socket()`, tinggal connect ke server sesuai IP dan port yang dituju dengan fungsi `connect()`. Dan berikutnya client bisa tersambung ke server.
    
    #### Pembuatan server dan client beli
    Untuk server dibuat dengan menggunakan syntax pembuatan socket pada server. Bedanya, pada kedua server di dalam `while(True)` akan digunakan shared memory agar dari kedua server nilai stok dapat terhubung. Bedanya dalam while tersebut, terdapat perbedaan pengecekan input dari client.
