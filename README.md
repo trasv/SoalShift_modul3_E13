@@ -123,6 +123,7 @@ Contoh:
    }
    ```
    Fungsi faktorial tersebut hanya dijalankan dengan perulangan dengan angka tersebut dikurang satu selama angka tersebut > 0. Hasilnya akan seperti berikut.
+   ![soal1.png](Soal1/soal1.png)
 
 2. Pada suatu hari ada orang yang ingin berjualan 1 jenis barang secara private, dia memintamu membuat program C dengan spesifikasi sebagai berikut:
 
@@ -158,7 +159,11 @@ Contoh:
    
    [soal2serverjual.c](Soal2/soal2serverjual.c)
    
-   #### Pembuatan server dan client
+   #### Socket programming
+   Dalam membuat socket programming, terdapat beberapa syarat dalam pembuatan dengan metode client-server. Dimana server harus berperan sebagai listener yang menunggu inisialisasi komunikasi dari client yang berperan sebagai inisialitator komunikasi. Oleh karena itu terdapat perbedaan langkah pembuatan server dan client sebagaimana dijelaskan di gambar berikut.
+   
+   
+   #### Pembuatan server dan client beli
    Untuk server dibuat dengan menggunakan syntax pembuatan socket pada server. Bedanya, pada kedua server di dalam `while(True)` akan digunakan shared memory agar dari kedua server nilai stok dapat terhubung. Bedanya dalam while tersebut, terdapat perbedaan pengecekan input dari client.
    
    Shared Memory
@@ -204,6 +209,7 @@ Contoh:
 	printf("%s\n", buffer);
    }
    ```
+   #### Pembuatan server dan client jual
    Di server jual, akan menampilkan sisa stok setiap 5 detik. Di situ digunakan thread karena diperlukan fungsi `sleep()`, jika sleep digunakan di program utama, maka selama waktu sleep, server tidak bisa menjalankan apapun termasuk menerima input dari client. Maka dibuat thread agar fungsi tersebut dijalankan secara terpisah. Dan jika client mengirim kata 'tambah' maka stok ditambah satu. Di sini juga digunakan shared memory agar terhubung dengan server beli.
    
    Sedangkan dalam client jual, tidak perlu menerima (read) dari server. Hanya mengirim ke server dengan `send()`. Seperti berikut.
